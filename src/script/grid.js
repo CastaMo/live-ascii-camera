@@ -76,7 +76,14 @@
     }
 
     function operArr(arr) {
+    	for (var i = 0, len = arr.length; i < arr.length; i++) {
+    		var _ref = arr[i];
+    		_cells[_ref.y][_ref.x].changeWord(_ref.index);
+    	}
+    }
 
+    function judgeNeedChange(y, x, index) {
+    	return _cells[y][x].isNeedChange(index);
     }
 
 
@@ -137,18 +144,24 @@
             },
 
             initConfig: function() {
-            	this.index = -1;
+            	this.index = 16;
             },
 
             changeWord: function(index) {
             	var changeColor = (Math.abs(index - this.index)) > 6;
             	this.index = index;
             	this.cellDom.innerHTML = characters[index];
+            	
             	if (changeColor) {
             		this.cellDom.style.color = "red";
             	} else {
             		this.cellDom.style.color = "#000";
             	}
+            	
+            },
+
+            isNeedChange: function(index) {
+            	return (this.index !== index);
             }
         }
 
@@ -157,7 +170,26 @@
 
     return {
         initial: initial,
-        operArr: operArr
+        operArr: operArr,
+        judgeNeedChange: judgeNeedChange
     };
 
 })(window, document);
+
+var testhehe = function() {
+	//grid.initial(160, 60);
+	var arr = [];
+	var count = 1000;
+	while (count--) {
+		var y = Math.floor(Math.random() * 60);
+		var x = Math.floor(Math.random() * 160);
+		var index = Math.floor(Math.random() * 15);
+		arr.push({
+			x:x,
+			y:y,
+			index:index
+		});
+	}
+	grid.operArr(arr);
+	setTimeout(testhehe, 1000);
+}

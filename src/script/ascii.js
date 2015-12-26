@@ -12,6 +12,7 @@ var ascii = (function() {
 		var canvasHeight = canvas.height;
 		
 		var asciiCharacters = "";
+		var changeArr = [];
 
 		// calculate contrast factor
 		// http://www.dfstudios.co.uk/articles/image-processing-algorithms-part-5/
@@ -39,15 +40,24 @@ var ascii = (function() {
 				// http://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
 				var brightness = (0.299 * contrastedColor.red + 0.587 * contrastedColor.green + 0.114 * contrastedColor.blue) / 255;
 
-				var character = characters[(characters.length - 1) - Math.round(brightness * (characters.length - 1))];
+				var index = (characters.length - 1) - Math.round(brightness * (characters.length - 1));
+
+				var character = characters[index];
 
 				asciiCharacters += character;
+				if (grid.judgeNeedChange(y/2, x, index)) {
+					changeArr.push({
+						y: y/2,
+						x: x,
+						index
+					});
+				}
 			}
 
 			asciiCharacters += "\n";
 		}
 
-		options.callback(asciiCharacters);
+		options.callback(changeArr);
 	}
 
 	function getColorAtOffset(data, offset) {
