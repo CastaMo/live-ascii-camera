@@ -1,19 +1,17 @@
 // Author: Andrei Gheorghe (http://github.com/idevelop)
 
 var ascii = (function() {
+	var characters = (" .,:;i1tfLCG08@").split("");
 	function asciiFromCanvas(canvas, options) {
 		// Original code by Jacob Seidelin (http://www.nihilogic.dk/labs/jsascii/)
 		// Heavily modified by Andrei Gheorghe (http://github.com/idevelop)
-
-		var characters = (" .,:;i1tfLCG08@").split("");
-
 		var context = canvas.getContext("2d");
 		var canvasWidth = canvas.width;
 		var canvasHeight = canvas.height;
 		
 		var asciiCharacters = "";
 		var changeArr = [];
-
+		var asciiStr = "";
 		// calculate contrast factor
 		// http://www.dfstudios.co.uk/articles/image-processing-algorithms-part-5/
 		var contrastFactor = (259 * (options.contrast + 255)) / (255 * (259 - options.contrast));
@@ -21,43 +19,49 @@ var ascii = (function() {
 		var imageData = context.getImageData(0, 0, canvasWidth, canvasHeight);
 		for (var y = 0; y < canvasHeight; y += 2) { // every other row because letters are not square
 			for (var x = 0; x < canvasWidth; x++) {
-				// get each pixel's brightness and output corresponding character
-
-				var offset = (y * canvasWidth + x) * 4;
-
-				var color = getColorAtOffset(imageData.data, offset);
-	
-				// increase the contrast of the image so that the ASCII representation looks better
-				// http://www.dfstudios.co.uk/articles/image-processing-algorithms-part-5/
-				var contrastedColor = {
-					red: bound(Math.floor((color.red - 128) * contrastFactor) + 128, [0, 255]),
-					green: bound(Math.floor((color.green - 128) * contrastFactor) + 128, [0, 255]),
-					blue: bound(Math.floor((color.blue - 128) * contrastFactor) + 128, [0, 255]),
-					alpha: color.alpha
-				};
-
-				// calculate pixel brightness
-				// http://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
-				var brightness = (0.299 * contrastedColor.red + 0.587 * contrastedColor.green + 0.114 * contrastedColor.blue) / 255;
-
-				var index = (characters.length - 1) - Math.round(brightness * (characters.length - 1));
+				var index = getCharacterIndex(x, y, canvasWidth, imageData, contrastFactor);
 
 				var character = characters[index];
 
-				asciiCharacters += character;
+				//asciiCharacters += character;
+				var asciiNumber = index;
+				x++;
+				asciiNumber += (16 * getCharacterIndex(x, y, canvasWidth, imageData, contrastFactor));
+				asciiStr += String.fromCharCode(asciiNumber);
+				/*
 				if (grid.judgeNeedChange(y/2, x, index)) {
-					changeArr.push({
-						y: y/2,
-						x: x,
-						index
-					});
+					changeArr.push([y/2,x,index]);
 				}
+				*/
 			}
-
-			asciiCharacters += "\n";
 		}
+		options.callback(asciiStr);
+		
+		
+		
+		//console.log(asciiCharacters.length / 1000, JSON.stringify(changeArr).length / 1000);
+	}
+	
+	function getCharacterIndex(x, y, canvasWidth, imageData, contrastFactor) {
+		var offset = (y * canvasWidth + x) * 4;
 
-		options.callback(changeArr);
+		var color = getColorAtOffset(imageData.data, offset);
+		
+		// increase the contrast of the image so that the ASCII representation looks better
+		// http://www.dfstudios.co.uk/articles/image-processing-algorithms-part-5/
+		var contrastedColor = {
+			red: bound(Math.floor((color.red - 128) * contrastFactor) + 128, [0, 255]),
+			green: bound(Math.floor((color.green - 128) * contrastFactor) + 128, [0, 255]),
+			blue: bound(Math.floor((color.blue - 128) * contrastFactor) + 128, [0, 255]),
+			alpha: color.alpha
+		};
+		
+		// calculate pixel brightness
+		// http://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
+		var brightness = (0.299 * contrastedColor.red + 0.587 * contrastedColor.green + 0.114 * contrastedColor.blue) / 255;
+		
+		var index = (characters.length - 1) - Math.round(brightness * (characters.length - 1));
+		return index;
 	}
 
 	function getColorAtOffset(data, offset) {

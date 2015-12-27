@@ -53,7 +53,8 @@
 
     var _asciiDom,
     	_cells,
-    	characters;
+    	characters,
+    	canvasWidth, canvasHeight;
 
 
     _asciiDom = query("#ascii");
@@ -61,6 +62,8 @@
     characters = (" .,:;i1tfLCG08@").split("");
 
     function initial(width, height) {
+    	canvasWidth = width;
+    	canvasHeight = height;
     	for (var y = 0; y < height; y++) {
     		var row;
     		row = new Row({seqNum: y});
@@ -75,10 +78,33 @@
     	}
     }
 
-    function operArr(arr) {
-    	for (var i = 0, len = arr.length; i < arr.length; i++) {
-    		var _ref = arr[i];
-    		_cells[_ref.y][_ref.x].changeWord(_ref.index);
+    function blackAll() {
+    	for (var i = 0, len1 = _cells.length; i < len1; i++) {
+    		for (var j = 0, len2 = _cells[i].length; j < len2; j++) {
+    			_cells[i][j].cellDom.style.color = "#000";
+    		}
+    	}
+    }
+    
+    function operArr(asciiStr) {
+    	for (var i = 0, len = asciiStr.length; i < len; i++) {
+    		try {
+	    		var asciiNumber = asciiStr.charCodeAt(i);
+	    		var y = Math.floor(i / (Math.floor(canvasWidth / 2)));
+	    		var x = Math.floor(i % (Math.floor(canvasWidth / 2)));
+	    		var f1 = Math.floor(asciiNumber % 16);
+	    		var f2 = Math.floor(asciiNumber / 16);
+	    		var cell1 = _cells[y][x*2];
+	    		var cell2 = _cells[y][x*2+1];
+	    		if (cell1.isNeedChange(f1)) {
+	    			cell1.changeWord(f1);
+	    		}
+	    		if (cell2.isNeedChange(f2)) {
+	    			cell2.changeWord(f2);
+	    		}
+	    	} catch(e) {
+	    		console.log(e);
+	    	}
     	}
     }
 
@@ -151,9 +177,9 @@
             	var changeColor = (Math.abs(index - this.index)) > 6;
             	this.index = index;
             	this.cellDom.innerHTML = characters[index];
-            	
             	if (changeColor) {
-            		this.cellDom.style.color = "red";
+            		this.cellDom.innerHTML = "@";
+            		this.cellDom.style.color = "#CE0000";
             	} else {
             		this.cellDom.style.color = "#000";
             	}
@@ -171,7 +197,8 @@
     return {
         initial: initial,
         operArr: operArr,
-        judgeNeedChange: judgeNeedChange
+        judgeNeedChange: judgeNeedChange,
+        blackAll: blackAll
     };
 
 })(window, document);
