@@ -1,12 +1,4 @@
-/*
-	camera.js v1.1
-	http://github.com/idevelop/camera.js
-
-	Author: Andrei Gheorghe (http://idevelop.github.com)
-	License: MIT
-*/
-
-var camera = (function() {
+;var camera = (function() {
 	var options;
 	var video, canvas, context;
 	var renderTimer;

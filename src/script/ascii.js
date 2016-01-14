@@ -1,10 +1,6 @@
-// Author: Andrei Gheorghe (http://github.com/idevelop)
-
-var ascii = (function() {
+;var ascii = (function() {
 	var characters = (" .,:;i1tfLCG08@").split("");
 	function asciiFromCanvas(canvas, options) {
-		// Original code by Jacob Seidelin (http://www.nihilogic.dk/labs/jsascii/)
-		// Heavily modified by Andrei Gheorghe (http://github.com/idevelop)
 		var context = canvas.getContext("2d");
 		var canvasWidth = canvas.width;
 		var canvasHeight = canvas.height;
@@ -12,34 +8,27 @@ var ascii = (function() {
 		var asciiCharacters = "";
 		var changeArr = [];
 		var asciiStr = "";
-		// calculate contrast factor
-		// http://www.dfstudios.co.uk/articles/image-processing-algorithms-part-5/
 		var contrastFactor = (259 * (options.contrast + 255)) / (255 * (259 - options.contrast));
 
 		var imageData = context.getImageData(0, 0, canvasWidth, canvasHeight);
-		for (var y = 0; y < canvasHeight; y += 2) { // every other row because letters are not square
+		for (var y = 0; y < canvasHeight; y += 2) { 
 			for (var x = 0; x < canvasWidth; x++) {
-				var index = getCharacterIndex(x, y, canvasWidth, imageData, contrastFactor);
 
-				var character = characters[index];
+				var asciiNumber = 0;
 
-				//asciiCharacters += character;
-				var asciiNumber = index;
+				//先把第一个数据压到这个ASCII码二进制的低四位
+				asciiNumber += getCharacterIndex(x, y, canvasWidth, imageData, contrastFactor);;
+
 				x++;
-				asciiNumber += (16 * getCharacterIndex(x, y, canvasWidth, imageData, contrastFactor));
+
+				//再把第二个数据压到这个ASCII码二进制的高四位，这样可以达到一个ASCII码二进制储存两个数据
+				asciiNumber += (getCharacterIndex(x, y, canvasWidth, imageData, contrastFactor) << 4);
+
+				//转换成ASCII码再加到传输的字符串上
 				asciiStr += String.fromCharCode(asciiNumber);
-				/*
-				if (grid.judgeNeedChange(y/2, x, index)) {
-					changeArr.push([y/2,x,index]);
-				}
-				*/
 			}
 		}
 		options.callback(asciiStr);
-		
-		
-		
-		//console.log(asciiCharacters.length / 1000, JSON.stringify(changeArr).length / 1000);
 	}
 	
 	function getCharacterIndex(x, y, canvasWidth, imageData, contrastFactor) {
@@ -47,17 +36,12 @@ var ascii = (function() {
 
 		var color = getColorAtOffset(imageData.data, offset);
 		
-		// increase the contrast of the image so that the ASCII representation looks better
-		// http://www.dfstudios.co.uk/articles/image-processing-algorithms-part-5/
 		var contrastedColor = {
 			red: bound(Math.floor((color.red - 128) * contrastFactor) + 128, [0, 255]),
 			green: bound(Math.floor((color.green - 128) * contrastFactor) + 128, [0, 255]),
 			blue: bound(Math.floor((color.blue - 128) * contrastFactor) + 128, [0, 255]),
 			alpha: color.alpha
 		};
-		
-		// calculate pixel brightness
-		// http://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
 		var brightness = (0.299 * contrastedColor.red + 0.587 * contrastedColor.green + 0.114 * contrastedColor.blue) / 255;
 		
 		var index = (characters.length - 1) - Math.round(brightness * (characters.length - 1));

@@ -89,13 +89,22 @@
     function operArr(asciiStr) {
     	for (var i = 0, len = asciiStr.length; i < len; i++) {
     		try {
+                //获取每一个ASCII码
 	    		var asciiNumber = asciiStr.charCodeAt(i);
+
+                //因为原先的字符串在'宽度'上被压缩成原来的一半，所以这里对字符串做行列切割的时候要注意'宽度'也要变为原来的一半
 	    		var y = Math.floor(i / (Math.floor(canvasWidth / 2)));
 	    		var x = Math.floor(i % (Math.floor(canvasWidth / 2)));
+
+                //取出低四位和高四位数据的具体内容
 	    		var f1 = Math.floor(asciiNumber % 16);
 	    		var f2 = Math.floor(asciiNumber / 16);
+
+                //因为传输前把两个数据压到一个ASCII上，所以在解密时，要注意对应的位置里的实际数据
 	    		var cell1 = _cells[y][x*2];
 	    		var cell2 = _cells[y][x*2+1];
+
+                //为考虑到网页的性能，先判断是否需要改变原来的字符，不需要则不做任何操作。
 	    		if (cell1.isNeedChange(f1)) {
 	    			cell1.changeWord(f1);
 	    		}
@@ -202,21 +211,3 @@
     };
 
 })(window, document);
-
-var testhehe = function() {
-	//grid.initial(160, 60);
-	var arr = [];
-	var count = 1000;
-	while (count--) {
-		var y = Math.floor(Math.random() * 60);
-		var x = Math.floor(Math.random() * 160);
-		var index = Math.floor(Math.random() * 15);
-		arr.push({
-			x:x,
-			y:y,
-			index:index
-		});
-	}
-	grid.operArr(arr);
-	setTimeout(testhehe, 1000);
-}

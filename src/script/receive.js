@@ -8,6 +8,5 @@
 			grid.blackAll();
 		}
     	grid.operArr(e.data);
-        //asciiContainer.innerHTML = e.data;
     }
 })();
