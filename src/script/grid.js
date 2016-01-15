@@ -81,7 +81,10 @@
     function blackAll() {
     	for (var i = 0, len1 = _cells.length; i < len1; i++) {
     		for (var j = 0, len2 = _cells[i].length; j < len2; j++) {
-    			_cells[i][j].cellDom.style.color = "#000";
+                var _ref = _cells[i][j];
+                var _refDom = _ref.cellDom;
+    			_refDom.style.color = "#000";
+                _refDom.innerHTML = characters[_ref.index];
     		}
     	}
     }
@@ -103,12 +106,11 @@
                 //因为传输前把两个数据压到一个ASCII上，所以在解密时，要注意对应的位置里的实际数据
 	    		var cell1 = _cells[y][x*2];
 	    		var cell2 = _cells[y][x*2+1];
-
                 //为考虑到网页的性能，先判断是否需要改变原来的字符，不需要则不做任何操作。
-	    		if (cell1.isNeedChange(f1)) {
+	    		if (cell1.checkNeedChange(f1)) {
 	    			cell1.changeWord(f1);
 	    		}
-	    		if (cell2.isNeedChange(f2)) {
+	    		if (cell2.checkNeedChange(f2)) {
 	    			cell2.changeWord(f2);
 	    		}
 	    	} catch(e) {
@@ -118,7 +120,7 @@
     }
 
     function judgeNeedChange(y, x, index) {
-    	return _cells[y][x].isNeedChange(index);
+    	return _cells[y][x].checkNeedChange(index);
     }
 
 
@@ -182,20 +184,34 @@
             	this.index = 16;
             },
 
+            emphaDom: function() {
+                this.count = 5;
+                this.cellDom.innerHTML = "@";
+                this.cellDom.style.color = "#CE0000";
+            },
+
+            recoverDom: function() {
+                this.cellDom.innerHTML = characters[this.index];
+                this.cellDom.style.color = "#000";
+            },
+
             changeWord: function(index) {
             	var changeColor = (Math.abs(index - this.index)) > 6;
             	this.index = index;
-            	this.cellDom.innerHTML = characters[index];
             	if (changeColor) {
-            		this.cellDom.innerHTML = "@";
-            		this.cellDom.style.color = "#CE0000";
+            		this.emphaDom();
             	} else {
-            		this.cellDom.style.color = "#000";
-            	}
-            	
+                    this.cellDom.innerHTML = characters[index];
+                }
             },
 
-            isNeedChange: function(index) {
+            checkNeedChange: function(index) {
+                if (this.count > 0) {
+                    this.count--;
+                    if (this.count === 0) {
+                        this.recoverDom();
+                    }
+                } 
             	return (this.index !== index);
             }
         }
